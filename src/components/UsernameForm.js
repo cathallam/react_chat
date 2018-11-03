@@ -29,6 +29,7 @@ render() {
       placeholder='Enter your full name'
       onChange={this.onChange}
       />
+      <input type='Submit' />
       </form>
     </div>
   )
