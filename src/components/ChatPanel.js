@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Chatkit from '@pusher/chatkit-client';
-import MessageList from '../components/MessageList'
+import MessageList from '../components/MessageList';
+import SendMessageForm from '../components/SendMessageForm';
 
 
 class ChatPanel extends Component {
@@ -11,7 +12,17 @@ class ChatPanel extends Component {
       currentRoom: {},
       messages: []
     }
+    // When the SendMessageForm is submitted, we access this.state.currentUser and call sendMessage (note, most interactions happen on currentUser)
+    this.sendMessage = this.sendMessage.bind(this)
   }
+
+  sendMessage(text) {
+    this.state.currentUser.sendMessage({
+      text,
+      roomId: this.state.currentRoom.id,
+    })
+  }
+
 // Instantiate ChatKit ChatManager with instanceLocator, userID from this.props.currentUsername and a custom TokenProvider that points to /authenticate route
   componentDidMount() {
     const chatManager = new Chatkit.ChatManager({
@@ -84,6 +95,7 @@ class ChatPanel extends Component {
             messages={this.state.messages}
             style={styles.chatList}
             />
+            <SendMessageForm onSubmit={this.sendMessage} />
             </section>
            </div>
         </div>
