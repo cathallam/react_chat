@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Chatkit from '@pusher/chatkit-client';
 import MessageList from '../components/MessageList';
 import SendMessageForm from '../components/SendMessageForm';
+import Typing from '../components/Typing';
 
 
 class ChatPanel extends Component {
@@ -10,11 +11,20 @@ class ChatPanel extends Component {
     this.state = {
       currentUser: {},
       currentRoom: {},
-      messages: []
+      messages: [],
+      usersWhoAreTyping: [],
     }
+
     // When the SendMessageForm is submitted, we access this.state.currentUser and call sendMessage (note, most interactions happen on currentUser)
     this.sendMessage = this.sendMessage.bind(this)
+    this.sendTypingEvent = this.sendTypingEvent.bind(this)
   }
+  
+  sendTypingEvent() {
+    this.state.currentUser
+      .isTypingIn({ roomId: this.state.currentRoom.id })
+      .catch(error => console.error('error', error))
+    }
 
   sendMessage(text) {
     this.state.currentUser.sendMessage({
@@ -49,9 +59,22 @@ class ChatPanel extends Component {
               messages: [...this.state.messages, message],
             })
           },
-        },
-      })
-    })
+          // Calling currentUser.userIsTyping when the current user starts typing; then,listening to userStartedTyping and userStoppedTyping events
+          onUserStartedTyping: user => {
+            this.setState({
+              usersWhoAreTyping: [...this.state.usersWhoAreTyping, user.name],
+            })
+          },
+            onUserStoppedTyping: user => {
+              this.setState({
+                usersWhoAreTyping: this.state.usersWhoAreTyping.filter(
+                username => username !== user.name
+                  ),
+                })
+              },
+            },
+          })
+        })
     .then(currentRoom => {
       this.setState({ currentRoom })
     })
@@ -95,7 +118,10 @@ class ChatPanel extends Component {
             messages={this.state.messages}
             style={styles.chatList}
             />
-            <SendMessageForm onSubmit={this.sendMessage} />
+            <Typing usersWhoAreTyping={this.state.usersWhoAreTyping} />
+            <SendMessageForm onSubmit={this.sendMessage} 
+            onChange={this.sendTypingEvent}
+            />
             </section>
            </div>
         </div>
