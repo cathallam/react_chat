@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import Chatkit from '@pusher/chatkit-client';
 import MessageList from '../components/MessageList';
 import SendMessageForm from '../components/SendMessageForm';
-import Typing from '../components/Typing';
+import TypingIndicator from '../components/TypingIndicator';
+import WhosOnlineList from '../components/WhosOnlineList';
 
 
 class ChatPanel extends Component {
@@ -72,7 +73,9 @@ class ChatPanel extends Component {
                   ),
                 })
               },
-            },
+            onPresenceChange: () => this.forceUpdate(),
+            onUserJoined: () => this.forceUpdate(),
+          },
           })
         })
     .then(currentRoom => {
@@ -111,14 +114,17 @@ class ChatPanel extends Component {
       <div style={styles.container}>
         <div style={styles.chatContainer}>
         <aside style={styles.whosOnlineListContainer}>
-          <h2>Active Users</h2>
+        <WhosOnlineList
+        currentUser={this.state.currentUser}
+        users={this.state.currentRoom.users}
+        />
         </aside>
         <section style={styles.chatListContainer}>
           <MessageList
             messages={this.state.messages}
             style={styles.chatList}
             />
-            <Typing usersWhoAreTyping={this.state.usersWhoAreTyping} />
+            <TypingIndicator usersWhoAreTyping={this.state.usersWhoAreTyping} />
             <SendMessageForm onSubmit={this.sendMessage} 
             onChange={this.sendTypingEvent}
             />
